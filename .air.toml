@@ -1,0 +1,16 @@
+# Thư mục gốc của dự án
+root = "."
+
+# Các file/folder cần theo dõi
+[build]
+include = ["./cmd", "./internal", "./config"]
+exclude = ["vendor", "tmp"]
+
+cmd = "go run ./cmd/server/main.go"
+
+# Các file cần tải lại khi thay đổi
+[log]
+level = "debug"
+
+[watch]
+extensions = ["go", "yaml"]

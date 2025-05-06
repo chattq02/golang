@@ -1,0 +1,173 @@
+basePath: /v1/2024
+definitions:
+  model.LoginInput:
+    properties:
+      user_account:
+        type: string
+      user_password:
+        type: string
+    type: object
+  model.RegisterInput:
+    properties:
+      verify_key:
+        type: string
+      verify_purpose:
+        type: string
+      verify_type:
+        type: integer
+    type: object
+  model.UpdatePasswordRegisterInput:
+    properties:
+      user_password:
+        type: string
+      user_token:
+        type: string
+    type: object
+  model.VerifyInput:
+    properties:
+      verify_code:
+        type: string
+      verify_key:
+        type: string
+    type: object
+  response.ErrorResponseData:
+    properties:
+      code:
+        description: status code
+        type: integer
+      detail:
+        description: dữ liệu trả ra
+      err:
+        description: thông báo lỗi
+        type: string
+    type: object
+  response.ResponseData:
+    properties:
+      code:
+        description: status code
+        type: integer
+      data:
+        description: dữ liệu trả ra
+      message:
+        description: thông báo lỗi
+        type: string
+    type: object
+host: localhost:8082
+info:
+  contact:
+    email: baotuyet927@gmail.com
+    name: TEAM DEV
+    url: https://github.com/chattq/Ecommerce
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: https://github.com/chattq/Ecommerce
+  title: API documentation Ecommerce Backend SHOPDEVGO
+  version: 1.0.0
+paths:
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: User Login
+      parameters:
+      - description: User Login Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+      summary: User Login
+      tags:
+      - accounts
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: When a user registers, an OTP is sent to their email
+      parameters:
+      - description: User Registration Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.RegisterInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+      summary: User Registration
+      tags:
+      - accounts
+  /user/update_pass_register:
+    post:
+      consumes:
+      - application/json
+      description: UpdatePasswordRegister
+      parameters:
+      - description: Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdatePasswordRegisterInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+      summary: UpdatePasswordRegister
+      tags:
+      - account management
+  /user/verify_account:
+    post:
+      consumes:
+      - application/json
+      description: Verify OTP login by user
+      parameters:
+      - description: payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.VerifyInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+      summary: Verify OTP login by user
+      tags:
+      - account management
+swagger: "2.0"
