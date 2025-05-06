@@ -6,6 +6,9 @@ fmt.Printf("user: %+v\n", user) -- giống với console.log
 "sqlc generate" gen ra các func ở trong internal/database
 ////////////////////////////////////
 
+## lưu các package
+   go mod download
+
 Goose: Quản lý migration, giúp điều chỉnh schema cơ sở dữ liệu theo thời gian.
 sqlc: Tạo mã Go an toàn về kiểu từ các câu lệnh SQL, giảm công sức viết các truy vấn thủ công.
 
@@ -51,6 +54,8 @@ Loại Mô tả
 :copyfrom Dùng với PostgreSQL để sao chép dữ liệu hàng loạt.
 
 # chạy redis
+
+docker run -d --name my-redis -p 6381:6379 redis:latest
 
 docker exec -it redis redis-cli
 
