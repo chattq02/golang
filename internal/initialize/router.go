@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"Go/global"
+	"Go/internal/middlewares"
 	"Go/internal/routers"
 )
-
 
 func InitRouter() *gin.Engine {
 
@@ -21,6 +21,7 @@ func InitRouter() *gin.Engine {
 	}
 
 	// middleware
+	r.Use(middlewares.ValidatiorMiddleware())
 	// r.Use() // logging
 	// r.Use() // cross
 	// r.Use() // limit global
@@ -34,11 +35,11 @@ func InitRouter() *gin.Engine {
 	}
 	{
 		userRouter.InitUserRouter(MainGroup)
-		userRouter.InitProductRouter(MainGroup)  
+		userRouter.InitProductRouter(MainGroup)
 	}
 	{
 		manageRouter.InitAdminRouter(MainGroup)
-		manageRouter.InitUserRouter(MainGroup)     
+		manageRouter.InitUserRouter(MainGroup)
 	}
 
 	return r

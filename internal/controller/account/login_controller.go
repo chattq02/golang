@@ -1,10 +1,14 @@
 package account
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
 
 	"Go/global"
+	"Go/internal/middlewares"
 	"Go/internal/model"
 	"Go/internal/service"
 	"Go/pkg/response"
@@ -29,19 +33,19 @@ var LoginController = new(cUserLogin)
 func (c *cUserLogin) VerifyOTP(ctx *gin.Context) {
 	var params model.VerifyInput
 
-    if err := ctx.ShouldBindJSON(&params); err != nil {
-        response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
-        return
-    }
+	if err := ctx.ShouldBindJSON(&params); err != nil {
+		response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
+		return
+	}
 
-    result, err := service.UserLogin().VerifyOTP(ctx, &params)
+	result, err := service.UserLogin().VerifyOTP(ctx, &params)
 	if err != nil {
-        global.Logger.Error("Error verifying OTP", zap.Error(err))
-        response.ErrorResponse(ctx, response.ErrInvalidOTP, err.Error())
-        return
-    }
-	
-    response.SuccessResponse(ctx, response.ErrCodeSuccess, result)
+		global.Logger.Error("Error verifying OTP", zap.Error(err))
+		response.ErrorResponse(ctx, response.ErrInvalidOTP, err.Error())
+		return
+	}
+
+	response.SuccessResponse(ctx, response.ErrCodeSuccess, result)
 }
 
 // login godoc
@@ -56,24 +60,23 @@ func (c *cUserLogin) VerifyOTP(ctx *gin.Context) {
 // @Router       /user/login [post]
 func (c *cUserLogin) Login(ctx *gin.Context) {
 	// Implement logic for login
-    var params model.LoginInput
+	var params model.LoginInput
 
 	if err := ctx.ShouldBindJSON(&params); err != nil {
-        response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
-        return
-    }
+		response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
+		return
+	}
 
 	codeRs, dataRs, err := service.UserLogin().Login(ctx, &params)
 
 	if err != nil {
-        response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
-        return
-    }
+		response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
+		return
+	}
 
 	response.SuccessResponse(ctx, codeRs, dataRs)
 
 }
-
 
 // Register godoc
 // @Summary      User Registration
@@ -88,22 +91,36 @@ func (c *cUserLogin) Login(ctx *gin.Context) {
 func (c *cUserLogin) Register(ctx *gin.Context) {
 	var params model.RegisterInput
 
+	// Lấy validation context từ gin context
+	validationContext, exists := ctx.Get("validation_context")
+	if !exists {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Validator not found"})
+		return
+	}
+	// lấy dữ liệu
 	if err := ctx.ShouldBindJSON(&params); err != nil {
-        response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
-        return
-    }
+		response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
+		return
+	}
 
-	codeStatus, err := service.UserLogin().Register(ctx, &params) 
+	vc := validationContext.(*middlewares.ValidationContext)
+	// Validate input
+	if err := vc.Validator.Struct(params); err != nil {
+		errs := err.(validator.ValidationErrors)
+		response.ErrorValidator(ctx, http.StatusBadRequest, errs, vc)
+		return
+	}
+
+	codeStatus, err := service.UserLogin().Register(ctx, &params)
 
 	if err != nil {
 		global.Logger.Error("Error registering user OTP", zap.Error(err))
-        response.ErrorResponse(ctx, codeStatus, err.Error())
-        return
-    }
+		response.ErrorResponse(ctx, codeStatus, err.Error())
+		return
+	}
 
 	response.SuccessResponse(ctx, codeStatus, nil)
 }
-
 
 // UpdatePasswordRegister godoc
 // @Summary      UpdatePasswordRegister
@@ -119,17 +136,17 @@ func (c *cUserLogin) UpdatePasswordRegister(ctx *gin.Context) {
 	var params model.UpdatePasswordRegisterInput
 
 	if err := ctx.ShouldBindJSON(&params); err != nil {
-        response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
-        return
-    }
+		response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
+		return
+	}
 
-	result, err := service.UserLogin().UpdatePasswordRegister(ctx, params.UserToken, params.UserPassword) 
+	result, err := service.UserLogin().UpdatePasswordRegister(ctx, params.UserToken, params.UserPassword)
 
 	if err != nil {
 		global.Logger.Error("Error UpdatePasswordRegister", zap.Error(err))
-        response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
-        return
-    }
+		response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
+		return
+	}
 
 	response.SuccessResponse(ctx, response.ErrCodeSuccess, result)
 }
